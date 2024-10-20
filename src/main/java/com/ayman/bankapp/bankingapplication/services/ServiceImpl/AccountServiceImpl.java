@@ -22,6 +22,12 @@ public class AccountServiceImpl implements AccountService {
     public BankResponse createAccount(String email, String accountName) {
         // Find the user by email
         User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return BankResponse.builder()
+                    .responseCode("ERROR")
+                    .responseMessage("User does not exist")
+                    .build();
+        }
         // Create a new account for the user
         Account newAccount = Account.builder()
                 .accountName(accountName)
@@ -29,7 +35,13 @@ public class AccountServiceImpl implements AccountService {
                 .accountBalance(BigDecimal.ZERO)
                 .user(user)
                 .build();
+
         accountRepository.save(newAccount);
+
+        //add the acc to the user's acc list
+        user.getAccounts().add(newAccount);
+        userRepository.save(user);
+
         return BankResponse.builder()
                 .responseCode("SUCCESS")
                 .responseMessage("Account created successfully")
@@ -45,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
         String accountNumber;
         do {
             accountNumber = AccountUtils.generateAccountNumber();
-        } while (userRepository.existsByAccountNumber(accountNumber));
+        } while (accountRepository.existsByAccountNumber(accountNumber));
         return accountNumber;
     }
 }

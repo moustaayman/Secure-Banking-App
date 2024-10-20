@@ -1,8 +1,10 @@
 package com.ayman.bankapp.bankingapplication.services;
 
-import com.ayman.bankapp.bankingapplication.dtos.BankResponse;
-import com.ayman.bankapp.bankingapplication.dtos.UserRequest;
+import com.ayman.bankapp.bankingapplication.dtos.UserRegistrationRequest;
+import com.ayman.bankapp.bankingapplication.dtos.UserResponse;
+import com.ayman.bankapp.bankingapplication.entities.User;
 
 public interface UserService {
-    BankResponse createUser(UserRequest userRequest);
+    UserResponse registerUser(UserRegistrationRequest userRegistrationRequest);
+    User getUserByEmail(String email);
 }
