@@ -2,13 +2,11 @@ package com.ayman.bankapp.bankingapplication.entities;
 
 import com.ayman.bankapp.bankingapplication.enums.Gender;
 import com.ayman.bankapp.bankingapplication.enums.Role;
-import com.ayman.bankapp.bankingapplication.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +14,7 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +31,9 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+    private LocalDateTime registrationDate;
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Account> accounts = new ArrayList<>();
     //is KYC verified ?
     //private boolean isKycVerified;
