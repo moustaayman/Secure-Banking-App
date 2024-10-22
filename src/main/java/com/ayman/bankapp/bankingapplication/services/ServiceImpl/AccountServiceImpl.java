@@ -1,33 +1,38 @@
 package com.ayman.bankapp.bankingapplication.services.ServiceImpl;
 
-import com.ayman.bankapp.bankingapplication.dtos.AccountInfo;
-import com.ayman.bankapp.bankingapplication.dtos.BankResponse;
+import com.ayman.bankapp.bankingapplication.dtos.AccountResponse;
+import com.ayman.bankapp.bankingapplication.dtos.EmailDetails;
 import com.ayman.bankapp.bankingapplication.entities.Account;
 import com.ayman.bankapp.bankingapplication.entities.User;
+import com.ayman.bankapp.bankingapplication.exceptions.CustomException;
 import com.ayman.bankapp.bankingapplication.repositories.AccountRepository;
 import com.ayman.bankapp.bankingapplication.repositories.UserRepository;
 import com.ayman.bankapp.bankingapplication.services.AccountService;
+import com.ayman.bankapp.bankingapplication.services.EmailService;
 import com.ayman.bankapp.bankingapplication.utils.AccountUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
     private UserRepository userRepository;
     private AccountRepository accountRepository;
+    private EmailService emailService;
+    private final String html = "<html><body><h1>Account Created</h1><p>Dear %s, your account has been created successfully!</p></body></html>";
     @Override
-    public BankResponse createAccount(String email, String accountName) {
+    public AccountResponse createAccount(String email, String accountName) {
         // Find the user by email
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return BankResponse.builder()
-                    .responseCode("ERROR")
-                    .responseMessage("User does not exist")
-                    .build();
+        if (!userRepository.existsByEmail(email)) {
+            throw new CustomException.BadRequestException("No user found with the specified email");
         }
+        User user = userRepository.findByEmail(email);
         // Create a new account for the user
         Account newAccount = Account.builder()
                 .accountName(accountName)
@@ -42,13 +47,29 @@ public class AccountServiceImpl implements AccountService {
         user.getAccounts().add(newAccount);
         userRepository.save(user);
 
-        return BankResponse.builder()
-                .responseCode("SUCCESS")
+        // Prepare and send the email
+        String htmlBody = String.format(html, user.getFirstName());
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(user.getEmail())
+                .subject("Account Created Successfully!")
+                .body(htmlBody)
+                .build();
+
+        emailService.sendSimpleMail(emailDetails);
+
+        return AccountResponse.builder()
                 .responseMessage("Account created successfully")
-                .accountInfo(AccountInfo.builder()
+                .accountInfo(Account.builder()
                         .accountName(newAccount.getAccountName())
                         .accountNumber(newAccount.getAccountNumber())
                         .accountBalance(newAccount.getAccountBalance())
+                        .user(User.builder()
+                                .firstName(user.getFirstName())
+                                .lastName(user.getLastName())
+                                .email(user.getEmail())
+                                .roles(user.getRoles())
+                                .registrationDate(user.getRegistrationDate())
+                                .build())
                         .build())
                 .build();
     }
