@@ -1,7 +1,7 @@
 package com.ayman.bankapp.bankingapplication.services;
 
-import com.ayman.bankapp.bankingapplication.dtos.BankResponse;
+import com.ayman.bankapp.bankingapplication.dtos.AccountResponse;
 
 public interface AccountService {
-    BankResponse createAccount(String email, String accountName);
+    AccountResponse createAccount(String email, String accountName);
 }
