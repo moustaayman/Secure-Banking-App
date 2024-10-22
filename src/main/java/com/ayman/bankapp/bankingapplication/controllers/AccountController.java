@@ -1,6 +1,7 @@
 package com.ayman.bankapp.bankingapplication.controllers;
 
-import com.ayman.bankapp.bankingapplication.dtos.BankResponse;
+import com.ayman.bankapp.bankingapplication.dtos.AccountRequest;
+import com.ayman.bankapp.bankingapplication.dtos.AccountResponse;
 import com.ayman.bankapp.bankingapplication.services.AccountService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping(path = "/create")
-    public ResponseEntity<BankResponse> createUser(@RequestBody String email, String accountName) {
-        return new ResponseEntity<>(accountService.createAccount(email, accountName), HttpStatus.CREATED);
+    public ResponseEntity<AccountResponse> createUser(@RequestBody AccountRequest accountRequest) {
+        return new ResponseEntity<>(accountService.createAccount(accountRequest.email(), accountRequest.accountName()), HttpStatus.CREATED);
     }
 }
