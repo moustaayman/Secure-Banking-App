@@ -9,6 +9,7 @@ import com.ayman.bankapp.bankingapplication.repositories.UserRepository;
 import com.ayman.bankapp.bankingapplication.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
     @Override
+    @Transactional
     public UserResponse registerUser(UserRegistrationRequest userRegistrationRequest) {
         //checking if the user already has an account
         if(userRepository.existsByEmail(userRegistrationRequest.email())) {
