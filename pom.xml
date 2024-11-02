@@ -59,6 +59,10 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.ayman.bankapp</groupId>
             <artifactId>banking-application</artifactId>
             <version>0.0.1-SNAPSHOT</version>

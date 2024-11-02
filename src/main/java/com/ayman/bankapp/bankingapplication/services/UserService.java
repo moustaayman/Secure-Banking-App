@@ -6,6 +6,5 @@ import com.ayman.bankapp.bankingapplication.entities.User;
 
 public interface UserService {
     UserResponse registerUser(UserRegistrationRequest userRegistrationRequest);
-
     User getUserByEmail(String email);
 }
