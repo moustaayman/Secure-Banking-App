@@ -2,6 +2,7 @@ package com.ayman.bankapp.bankingapplication.entities;
 
 import com.ayman.bankapp.bankingapplication.enums.Gender;
 import com.ayman.bankapp.bankingapplication.enums.Role;
+import com.ayman.bankapp.bankingapplication.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -28,12 +29,13 @@ public class User {
     private String city;
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
     private LocalDateTime registrationDate;
-    @OneToMany(mappedBy = "user")
-    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Account> accounts = new ArrayList<>();
     //is KYC verified ?
     //private boolean isKycVerified;
