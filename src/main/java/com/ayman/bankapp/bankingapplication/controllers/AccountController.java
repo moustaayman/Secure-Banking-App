@@ -42,7 +42,7 @@ public class AccountController {
     }
 
     @GetMapping(path = "/{accountNumber}/statement")
-    public ResponseEntity<byte[]> downloadBankStatement(
+    public ResponseEntity<String> downloadBankStatement(
             @PathVariable String accountNumber,
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate) {
@@ -50,17 +50,9 @@ public class AccountController {
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 
-        // Generate the PDF statement
-        byte[] pdfBytes = bankStatementService.generateBankStatement(accountNumber, start, end);
+        bankStatementService.generateBankStatement(accountNumber, start, end);
 
-        // Set headers to force download of PDF
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "BankStatement_" + accountNumber + ".pdf");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(pdfBytes);
+        return ResponseEntity.ok("Bank statement has been sent to the account owner email");
     }
 
     @DeleteMapping(path = "/delete/{accountNumber}")
