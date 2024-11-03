@@ -4,6 +4,7 @@ import com.ayman.bankapp.bankingapplication.dtos.EmailDetails;
 import com.ayman.bankapp.bankingapplication.services.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setTo(emailDetails.recipient());
             helper.setSubject(emailDetails.subject());
-            helper.setText(emailDetails.body(), true); // true -> HTML
+            helper.setText(emailDetails.body(), true);
 
             javaMailSender.send(message);
         } catch (MailException | MessagingException e) {
@@ -31,7 +32,22 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMailWithAttachment(EmailDetails emailDetails) {
+    public void sendEmailWithAttachment(String toEmail, String subject, String body, byte[] bankStatement, String pdfName) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(body);
+
+            helper.addAttachment(pdfName, new ByteArrayDataSource(bankStatement, "application/pdf"));
+
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send email with attachment", e);
+        }
     }
+
+
 }
