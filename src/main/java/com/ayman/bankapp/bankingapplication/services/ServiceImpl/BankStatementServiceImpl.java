@@ -2,12 +2,14 @@ package com.ayman.bankapp.bankingapplication.services.ServiceImpl;
 
 import com.ayman.bankapp.bankingapplication.dtos.StatementResponse;
 import com.ayman.bankapp.bankingapplication.dtos.TransactionHistoryResponse;
+import com.ayman.bankapp.bankingapplication.entities.Account;
 import com.ayman.bankapp.bankingapplication.exceptions.CustomException;
 import com.ayman.bankapp.bankingapplication.repositories.AccountRepository;
+import com.ayman.bankapp.bankingapplication.repositories.UserRepository;
 import com.ayman.bankapp.bankingapplication.services.BankStatementService;
+import com.ayman.bankapp.bankingapplication.services.EmailService;
 import com.ayman.bankapp.bankingapplication.services.TransactionService;
 import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 public class BankStatementServiceImpl implements BankStatementService {
     private AccountRepository accountRepository;
     private TransactionService transactionService;
+    private  EmailService emailService;
     @Override
     public byte[] generateBankStatement(String accountNumber, LocalDate startDate, LocalDate endDate) {
         if (!accountRepository.existsByAccountNumber(accountNumber)) {
@@ -76,7 +79,19 @@ public class BankStatementServiceImpl implements BankStatementService {
             document.add(table);
 
             document.close();
-            return outputStream.toByteArray();
+            byte[] pdfBytes = outputStream.toByteArray();
+
+            Account account = accountRepository.findByAccountNumber(accountNumber);
+            String email = account.getUser().getEmail();
+            emailService.sendEmailWithAttachment(
+                    email,
+                    "Your Bank Statement",
+                    "Please find your bank statement attached for the requested period.",
+                    pdfBytes,
+                    "BankStatement_" + accountNumber + ".pdf"
+            );
+
+            return pdfBytes;
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF statement", e);
         }
