@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -170,5 +171,35 @@ public class TransactionServiceImpl implements TransactionService {
                     .recipientAccountNumber(transaction.getToAccount() != null ? transaction.getToAccount().getAccountNumber() : null)
                     .build()
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public StatementResponse getTransactionsByDateRange(String accountNumber, LocalDate startDate, LocalDate endDate) {
+        if(!accountRepository.existsByAccountNumber(accountNumber)) {
+            throw new CustomException.BadRequestException("No account found with the specified account number");
+        }
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+        List<Transaction> outgoingTransactions = transactionRepository.findByFromAccountAndTransactionDateBetween(account, startDateTime, endDateTime);
+        List<Transaction> incomingTransactions = transactionRepository.findByToAccountAndTransactionDateBetween(account, startDateTime, endDateTime);
+
+        List<Transaction> allTransactions = new ArrayList<>();
+        allTransactions.addAll(outgoingTransactions);
+        allTransactions.addAll(incomingTransactions);
+
+        List<TransactionHistoryResponse> transactionHistory = allTransactions.stream().map(transaction ->
+                TransactionHistoryResponse.builder()
+                        .amount(transaction.getAmount())
+                        .transactionDate(transaction.getTransactionDate())
+                        .type(transaction.getType())
+                        .build()
+        ).toList();
+        return StatementResponse.builder()
+                .accountNumber(accountNumber)
+                .transactions(transactionHistory)
+                .build();
     }
 }
