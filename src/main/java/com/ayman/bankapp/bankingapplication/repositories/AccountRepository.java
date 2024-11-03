@@ -1,6 +1,7 @@
 package com.ayman.bankapp.bankingapplication.repositories;
 
 import com.ayman.bankapp.bankingapplication.entities.Account;
+import com.ayman.bankapp.bankingapplication.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.math.BigDecimal;
