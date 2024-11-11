@@ -1,8 +1,8 @@
 package com.ayman.bankapp.bankingapplication.enums;
 
 public enum Role {
-    USER,
+    CUSTOMER,
     ADMIN,
     MANAGER,
-    CUSTOMER_SUPPORT
+    SUPPORT
 }

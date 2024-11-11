@@ -25,10 +25,10 @@ public class AccountController {
 
     @PostMapping(path = "/create")
     public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest accountRequest) {
-        return new ResponseEntity<>(accountService.createAccount(accountRequest.email(), accountRequest.accountName()), HttpStatus.CREATED);
+        return new ResponseEntity<>(accountService.createAccount(accountRequest.userId(), accountRequest.accountName()), HttpStatus.CREATED);
     }
     @GetMapping(path = "/balance/{accountNumber}")
-    public ResponseEntity<AccountBalanceResponse> createAccount(@PathVariable String accountNumber) {
+    public ResponseEntity<AccountBalanceResponse> getAccountBalance(@PathVariable String accountNumber) {
         return new ResponseEntity<>(accountService.getAccountBalance(accountNumber), HttpStatus.OK);
     }
     @PostMapping(path = "/deposit/{accountNumber}")
