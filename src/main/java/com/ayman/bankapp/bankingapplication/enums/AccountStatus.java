@@ -1,5 +1,5 @@
 package com.ayman.bankapp.bankingapplication.enums;
 
 public enum AccountStatus {
-    ACTIVE, CLOSED, SUSPENDED
+    ACTIVE, INACTIVE, CLOSED, SUSPENDED
 }
