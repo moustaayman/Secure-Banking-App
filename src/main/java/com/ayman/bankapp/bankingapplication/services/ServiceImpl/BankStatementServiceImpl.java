@@ -31,7 +31,7 @@ public class BankStatementServiceImpl implements BankStatementService {
     @Override
     public byte[] generateBankStatement(String accountNumber, LocalDate startDate, LocalDate endDate) {
         if (!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.badRequest("No account found with the specified account number");
         }
         StatementResponse statement = transactionService.getTransactionsByDateRange(accountNumber, startDate, endDate);
 

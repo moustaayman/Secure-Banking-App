@@ -5,6 +5,7 @@ import com.ayman.bankapp.bankingapplication.dtos.AccountResponse;
 import com.ayman.bankapp.bankingapplication.dtos.EmailDetails;
 import com.ayman.bankapp.bankingapplication.entities.Account;
 import com.ayman.bankapp.bankingapplication.entities.User;
+import com.ayman.bankapp.bankingapplication.enums.AccountStatus;
 import com.ayman.bankapp.bankingapplication.exceptions.CustomException;
 import com.ayman.bankapp.bankingapplication.repositories.AccountRepository;
 import com.ayman.bankapp.bankingapplication.repositories.UserRepository;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -27,23 +26,21 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
     private EmailService emailService;
 
-    private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     private final String htmlAccountCreation = "<html><body><h1>Account Created</h1><p>Dear %s, your account has been created successfully!</p></body></html>";
     private final String htmlAccountDeletion = "<html><body><h1>Account Closed</h1><p>Dear %s, your account has been closed successfully!</p></body></html>";
     @Override
     @Transactional
-    public AccountResponse createAccount(String email, String accountName) {
-        // Find the user by email
-        if (!userRepository.existsByEmail(email)) {
-            throw new CustomException.BadRequestException("No user found with the specified email");
+    public AccountResponse createAccount(String userID, String accountName) {
+        if (!userRepository.existsById(userID)) {
+            throw CustomException.notFound("No user found with the specified id");
         }
-        User user = userRepository.findByEmail(email);
-        // Create a new account for the user
+        User user = userRepository.findUserById(userID);
         Account newAccount = Account.builder()
                 .accountName(accountName)
                 .accountNumber(generateUniqueAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
+                .status(AccountStatus.ACTIVE)
                 .user(user)
                 .build();
 
@@ -53,7 +50,6 @@ public class AccountServiceImpl implements AccountService {
         user.getAccounts().add(newAccount);
         userRepository.save(user);
 
-        // Prepare and send the email
         String htmlBody = String.format(htmlAccountCreation, user.getFirstName());
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(user.getEmail())
@@ -84,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountBalanceResponse getAccountBalance(String accountNumber) {
         // checking if the account exists
         if (!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.notFound("No account found with the specified account number");
         }
         return AccountBalanceResponse.builder()
                 .balance(accountRepository.findByAccountNumber(accountNumber).getAccountBalance())
@@ -96,14 +92,14 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse closeAccount(String accountNumber) {
         // checking if the account exists
         if (!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.notFound("No account found with the specified account number");
         }
 
         Account account = accountRepository.findByAccountNumber(accountNumber);
 
         // checking if the account has a positive balance
         if (account.getAccountBalance().compareTo(BigDecimal.ZERO) > 0) {
-            throw new CustomException.BadRequestException("Cannot close account with remaining balance, please withdraw the balance first");
+            throw CustomException.badRequest("Cannot close account with remaining balance, please withdraw the balance first");
         }
 
         // removing the account from the user
@@ -139,10 +135,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private String generateUniqueAccountNumber() {
-        String accountNumber;
-        do {
-            accountNumber = AccountUtils.generateAccountNumber();
-        } while (accountRepository.existsByAccountNumber(accountNumber));
-        return accountNumber;
+        long uniqueNumber = System.currentTimeMillis();
+        return String.format("%010d", uniqueNumber);
     }
 }
