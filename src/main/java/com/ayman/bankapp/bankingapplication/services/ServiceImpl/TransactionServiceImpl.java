@@ -27,19 +27,15 @@ public class TransactionServiceImpl implements TransactionService {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
-
     @Override
     @Transactional
     public AccountResponse deposit(String accountNumber, BigDecimal amount) {
         //finding the account
         if(!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.badRequest("No account found with the specified account number");
         }
-        logger.info("Account Number: {}", accountNumber);
         System.out.println(accountNumber);
         Account account = accountRepository.findByAccountNumber(accountNumber);
-        logger.info("Account: {}", account);
         //updating the account balance
         account.setAccountBalance(account.getAccountBalance().add(amount));
 
@@ -66,12 +62,12 @@ public class TransactionServiceImpl implements TransactionService {
     public AccountResponse withdrawal(String accountNumber, BigDecimal amount) {
         //finding the account
         if(!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.badRequest("No account found with the specified account number");
         }
         Account account = accountRepository.findByAccountNumber(accountNumber);
         // Checking if there is enough balance to withdraw
         if (account.getAccountBalance().compareTo(amount) < 0) {
-            throw new CustomException.BadRequestException("Insufficient balance in account " + accountNumber);
+            throw CustomException.badRequest("Insufficient balance in account " + accountNumber);
         }
         //updating the account balance
         account.setAccountBalance(account.getAccountBalance().subtract(amount));
@@ -102,15 +98,15 @@ public class TransactionServiceImpl implements TransactionService {
         Account toAccount = accountRepository.findByAccountNumber(transferRequest.toAccountNumber());
 
         if (fromAccount == null) {
-            throw new CustomException.BadRequestException("Source account not found");
+            throw CustomException.badRequest("Source account not found");
         }
         if (toAccount == null) {
-            throw new CustomException.BadRequestException("Destination account not found");
+            throw CustomException.badRequest("Destination account not found");
         }
 
         //checking if the source account has enough balance
         if(fromAccount.getAccountBalance().compareTo(transferRequest.amount()) < 0) {
-            throw new CustomException.BadRequestException("Insufficient balance in the source account");
+            throw CustomException.badRequest("Insufficient balance in the source account");
         }
 
         //transfering
@@ -121,8 +117,8 @@ public class TransactionServiceImpl implements TransactionService {
         accountRepository.save(toAccount);
 
         Transaction debitTransaction = Transaction.builder()
-                .toAccount(toAccount)
                 .fromAccount(fromAccount)
+                .toAccount(toAccount)
                 .amount(transferRequest.amount())
                 .type(TransactionType.TRANSFER)
                 .transactionDate(LocalDateTime.now())
@@ -152,7 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionHistoryResponse> getTransactionHistory(String accountNumber) {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account == null) {
-            throw new CustomException.BadRequestException("Account not found.");
+            throw CustomException.badRequest("Account not found.");
         }
 
         List<Transaction> outgoingTransactions = transactionRepository.findByFromAccount(account);
@@ -176,7 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public StatementResponse getTransactionsByDateRange(String accountNumber, LocalDate startDate, LocalDate endDate) {
         if(!accountRepository.existsByAccountNumber(accountNumber)) {
-            throw new CustomException.BadRequestException("No account found with the specified account number");
+            throw CustomException.badRequest("No account found with the specified account number");
         }
         Account account = accountRepository.findByAccountNumber(accountNumber);
 
