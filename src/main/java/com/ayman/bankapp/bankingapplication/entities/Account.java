@@ -18,10 +18,8 @@ import java.util.List;
 @Table(name = "accounts")
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String accountName;
     private String accountNumber;
+    private String accountName;
     private BigDecimal accountBalance;
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
@@ -36,4 +34,5 @@ public class Account {
 
     @OneToMany(mappedBy = "toAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> toTransactions = new ArrayList<>();
+
 }
