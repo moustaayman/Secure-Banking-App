@@ -1,6 +1,7 @@
 package com.ayman.bankapp.bankingapplication.entities;
 
 import com.ayman.bankapp.bankingapplication.enums.AccountStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
