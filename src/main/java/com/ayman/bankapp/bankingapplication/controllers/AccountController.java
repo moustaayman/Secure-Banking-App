@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -32,7 +33,7 @@ public class AccountController {
         return new ResponseEntity<>(accountService.getAccountBalance(accountNumber), HttpStatus.OK);
     }
     @PostMapping(path = "/deposit/{accountNumber}")
-    public ResponseEntity<AccountResponse> deposit(@PathVariable String accountNumber, @RequestBody TransactionRequest transactionRequest) {
+    public ResponseEntity<AccountResponse> deposit(@PathVariable String accountNumber, @RequestBody TransactionRequest transactionRequest, Authentication authentication) {
         return new ResponseEntity<>(transactionService.deposit(accountNumber, transactionRequest.amount()), HttpStatus.OK);
     }
 
