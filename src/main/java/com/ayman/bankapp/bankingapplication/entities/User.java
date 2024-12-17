@@ -23,6 +23,7 @@ public class User {
     private String id;
     private String firstName;
     private String lastName;
+    @Column(unique = true)
     private String email;
     private String password;
     private String phoneNumber;
@@ -32,6 +33,7 @@ public class User {
     private Gender gender;
     @Enumerated(EnumType.STRING)
     private UserStatus status;
+    String refreshToken;
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
